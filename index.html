@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>uapay</title>
+<meta charset="utf-8">
+<!-- Including CryptoJS required libraries -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/hmac-sha256.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/enc-base64-min.js"></script>
+
+<!-- bootstrap -->
+<script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+<script src="//netdna.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/3.3.4/css/inputmask.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/3.3.4/inputmask/inputmask.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/3.3.4/inputmask/jquery.inputmask.min.js"></script>
+
+<link rel="stylesheet" href="https://widget.demo.uapay.ua/vendor/style.css">
+<!-- <script src="https://widget.demo.uapay.ua/vendor/widget-bundle.js"></script> -->
+
+<style type="text/css">
+	body {
+  		font-family: Arial;
+  		background: #fff;
+  		font-size: 14px;
+  		color: #bbb;
+	}
+
+	#res_s {
+	  color: green;
+	}
+	h1, h2, h4{
+		color: #000;
+	}
+	div#jwt_code_s, div#jwt_code_w, div#jwt_code_i, div#json_i, div#json_w {
+	    word-break: break-word;
+	}
+	#payload_s, #payload_w, #payload_i {
+	  color: orange;
+	}
+	#signature_s, #signature_w, #signature_i {
+	  color: red;
+	}
+
+
+	.form{
+		width: 350px;
+		margin: 0 auto;
+		border: 1px solid #ccc;
+		padding: 15px;
+	}
+	
+</style>
+
+
+</head>
+<body>
+
+<div class="container">
+
+	<div class="container">
+		<h1 class="text-center">DEV API UAPAY.UA</h1>
+		<hr>
+		<div class="form-group">
+			<label for="url_uapau">URL:</label>
+			<input class="form-control" type="text" id="url_uapau" placeholder="url_uapau" value="https://api.demo.uapay.ua" required>
+		</div>
+		<div class="form-group">
+			<label for="merchant_id">MERCHANT ID:</label>
+			<input class="form-control" type="text" id="merchant_id" placeholder="merchant_id" value="1425" required>
+		</div>
+		<div class="form-group">
+			<label for="token_uapay">MERCHANT SECRET KEY:</label>
+			<input class="form-control" type="text" id="token_uapay" placeholder="token_uapay" value="bJ2V3PWqoTfYUynDfaCKEw==" required>
+		</div>	
+	</div>
+	<br>
+	<h2 class="text-center">Integration:</h2>
+	<br>
+	<div id="exTab2" class="container">	
+		<ul class="nav nav-tabs">
+			<li class="active">
+        		<a  href="#1" data-toggle="tab">Form</a>
+			</li>
+			<li>
+        		<a  href="#2" data-toggle="tab">JS</a>
+			</li>
+			<li>
+				<a href="#3" data-toggle="tab">Widget</a>
+			</li>
+		</ul>
+
+			<div class="tab-content ">
+			  <div class="tab-pane active" id="1">
+			  		<br>
+			  		<div class="form">
+			  			<div class="row">
+				  			<div class="form-group col-lg-4">
+				  				<input type="radio" id="choice1" name="price" checked="checked" value="100">
+	    						<label for="choice1">100</label>
+	    					</div>
+				  			<div class="form-group col-lg-4">
+				  				<input type="radio" id="choice2" name="price" value="200">
+	    						<label for="choice1">200</label>
+	    					</div>
+	    					<div class="form-group col-lg-4">
+				  				<input type="radio" id="choice3" name="price" value="300">
+	    						<label for="choice1">300</label>
+	    					</div>
+			  			</div>
+			  			<div class="row">
+			  				<div class="col-lg-6">
+			  					<select id="tickets" class="form-control">
+			  						<option value="1">1 квиток</option>
+			  						<option value="2">2 квитка</option>
+			  						<option value="3">3 квитки</option>
+			  						<option value="4">4 квитки</option>
+			  						<option value="5">5 квитків</option>
+			  						<option value="6">6 квитків</option>
+			  						<option value="7">7 квитків</option>
+			  						<option value="8">8 квитків</option>
+			  						<option value="9">9 квитків</option>
+			  						<option value="10">10 квитків</option>
+			  					</select>
+			  				</div>
+			  				<div class="col-lg-6">
+			  					на сумму <span id="sum"></span>
+			  				</div>
+			  			</div>
+			  			<br>
+			  			<div class="row">
+			  				<div class="form-group col-lg-12">
+			  					<input type="name" name="name" class="form-control" id="name-f" placeholder="Ім'я" data-validate />
+			  				</div>
+			  				
+			  				<div class="form-group col-lg-12">
+			  					<input class="form-control" id="email-f" placeholder="Email" data-validate />
+			  				</div>
+			  				
+			  				<div class="form-group col-lg-12">
+			  					<input type="tel" class="form-control" id="phone-f" placeholder="Телефон" data-validate />
+			  				</div>
+			  			</div>
+			  			<div class="row text-center"><span id="res_f"></span></div>
+			  			<br>
+			  			<div class="row">
+			  				<div class="form-group col-lg-12">
+			  					прызначення платежу: <span id="text_invoice"></span>
+			  				</div>
+			  			</div>
+			  		</div>
+			  		
+			  </div>
+			  <div class="tab-pane" id="2">
+          			<div class="container">
+							<h2>1. Create session:</h2>
+							<h4>Json:</h4>
+							<div id="json_s"></div>
+							<br>
+							<h4>JWT token session:</h4>
+							<div id="jwt_code_s"><span id="header_s"></span>.<span id="payload_s"></span>.<span id="signature_s"></span></div>
+							<br>
+							<h2 class="text-center">ID session:  <span id="res_s"></span></h2>
+							<br>
+						<hr>
+							<h2>2. Create invoce:</h2>
+							<h4>Json:</h4>
+							<div id="json_i"></div>
+							<br>
+							<h4>JWT token invoce:</h4>
+							<div id="jwt_code_i"><span id="header_i"></span>.<span id="payload_i"></span>.<span id="signature_i"></span></div>
+							<br>
+							<br>
+							<h2 class="text-center"><span id="res_i"></span></h2>
+							<br>
+					</div>
+			  </div>
+			  <div class="tab-pane" id="3">
+         			<div class="container">
+         				<div class="container">
+         					<br>
+								<h4>Json:</h4>
+								<div id="json_w"></div>
+								<br>
+								<hr>
+							  <h4>JWT token widget:</h4>
+							  <div id="jwt_code_w"><span id="header_w"></span>.<span id="payload_w"></span>.<span id="signature_w"></span></div>
+							<br>
+							<div class="row">
+								<div class="col-lg-12">
+									<div class="form-group">
+										<label for="token">Token:</label>
+										<input class="form-control" type="text" id="token" placeholder="token" value="" required>
+									</div>
+								</div>
+								
+								<div class="col-lg-12">
+									<div class="form-group">
+										<label for="target">Target:</label>
+										<input class="form-control" type="text" id="target" placeholder="target" value="payment_widget" readonly>
+									</div>
+								</div>
+
+								<div class="col-lg-12">
+									<div class="form-group form-check">
+										<input class="form-check-input" type="checkbox" id="sandbox" checked="checked">
+										<label for="sandbox">Use stage</label>
+									</div>
+								</div>
+
+								<div class="col-lg-12">
+									<div class="form-group">
+										<button onclick="startExample()" class="btn btn-primary">Submit token</button>
+									</div>
+								</div>
+							</div>
+							<hr>
+							<div class="row">
+								<div class="col-lg-12">
+									<div id="payment_widget"></div>
+								</div>
+							</div>
+						</div>
+         			</div>
+			  </div>
+			  
+			</div>
+  </div>
+
+</div>
+
+ 
+<script>
+	$(document).ready(function() {
+	    $('#myTab a').click(function (e) {
+			  e.preventDefault()
+			  $(this).tab('show')
+		});
+	});
+</script>
+
+
+<script>
+
+	let session_id, iat, name, phone, email, sum_total, tiket, price, line_payment;
+	
+	const time = Math.round((new Date()).getTime() / 1000);
+	const url = document.getElementById('url_uapau').value;
+    const secret = document.getElementById('token_uapay').value;
+    const id = document.getElementById('merchant_id').value;
+	
+
+	ticket = $("#tickets").val();
+	price = getPrice();
+	sum_total = price*ticket;
+	name = "";
+	phone = "";
+	email = "";
+
+	$(document).ready(function() {
+
+	    $('input[type="tel"]').inputmask('+3 (999) 999 99 99');
+
+  		$('#email-f').inputmask("*{1,20}@*{1,3}[.*{1,3}]");
+
+		document.getElementById('name-f').value = "";
+		document.getElementById('email-f').value = "";
+		document.getElementById('phone-f').value = "";
+		document.getElementById("sum").innerHTML = sum_total;
+
+		//при изменении select
+		$("select").on("change", function(){
+			var price = getPrice();
+			var count_ticket = $("#tickets").val();
+			sum_total = price * count_ticket;
+		   document.getElementById("sum").innerHTML = sum_total;
+		   line_payment = createTextLine(name, phone, email, count_ticket, price, sum_total)
+		   document.getElementById("text_invoice").innerHTML = line_payment;
+		   JWTsession(line_payment);
+		});
+
+		//при изменении radio
+		$("input[name=price]").on("change", function(){  
+		   var count_ticket = $("#tickets").val();
+		   var price = getPrice();
+		   sum_total = price * count_ticket;
+		   document.getElementById("sum").innerHTML = sum_total;
+		   line_payment = createTextLine(name, phone, email, count_ticket, price, sum_total)
+		   document.getElementById("text_invoice").innerHTML = line_payment;
+		   JWTsession(line_payment);
+		});
+
+		line_payment = createTextLine(name, phone, email, ticket, price, sum_total); 
+		document.getElementById("text_invoice").innerHTML = line_payment;
+		JWTsession(line_payment);
+
+	});
+	
+	
+	    
+	document.getElementById("name-f").addEventListener('input', onName);
+	document.getElementById("email-f").addEventListener('blur', onEmail);
+	document.getElementById("phone-f").addEventListener('blur', onPhone);
+
+	function onName() {
+	  name = this.value;
+	  line_payment = createTextLine(name, phone, email, ticket, price, sum_total); 
+	  document.getElementById("text_invoice").innerHTML = line_payment;
+	  JWTsession(line_payment);
+	}
+	function onEmail() {
+	  email = this.value;
+	  line_payment = createTextLine(name, phone, email, ticket, price, sum_total); 
+	  document.getElementById("text_invoice").innerHTML = line_payment;
+	  JWTsession(line_payment);
+	}
+	function onPhone() {
+		phone = this.value;
+	    line_payment = createTextLine(name, phone, email, ticket, price, sum_total); 
+	    document.getElementById("text_invoice").innerHTML = line_payment;
+	    JWTsession(line_payment);
+	}
+
+	function getPrice(){
+		var checkElements = document.getElementsByName("price");
+		for(var i=0; i<checkElements.length; i++){
+	        checkElement = checkElements[i];
+			if (checkElement.checked==1){
+			  	return checkElement.value;
+			}  
+		}
+	}
+
+	function onPayment(id){
+		if (name == "") {
+			alert("заполните имя");
+			return;
+		}
+		console.log(id);
+		location.href=id;
+	}
+
+	function createTextLine(name, phone, email, tikets, price, sum){
+		var line = name + ' , тел.: '+ phone + ' email: ' + email + ' заказ: ' + tikets + ' * ' + price + ' = ' + sum;
+		return line;
+	};
+
+	function JWTsession(line_text) {
+		    
+			var data = { 
+			   "params":{ 
+			      "clientId":id
+			   },
+			   "iat": time
+			};
+
+			var signature = encodedHeader() + "." + encodedData(data);
+
+			document.getElementById("header_s").innerText = encodedHeader();
+			document.getElementById("payload_s").innerText = encodedData(data);
+			document.getElementById("signature_s").innerText = criptSignature(signature);
+
+			jwt_s = encodedHeader() + '.' + encodedData(data) + '.' +  criptSignature(signature);
+			
+			var data_send = { 
+			   "params":{ 
+			      "clientId":id
+			   },
+			   "iat": time,
+			   "token": jwt_s
+			};
+			
+			document.getElementById("json_s").innerHTML = JSON.stringify(data_send, undefined, 2);
+
+			var xhr = new XMLHttpRequest();
+			
+			xhr.addEventListener("readystatechange", function () {
+			  if (this.readyState === 4) {
+			  	//console.log(JSON.parse(this.responseText).data['token']);
+			  	jwt_token = JSON.parse(this.responseText).data['token'];
+			  	//console.log(parseJwt(jwt_token));
+			  	session_id = parseJwt(jwt_token).id;
+			  	iat = parseJwt(jwt_token).iat;
+			    document.getElementById("res_s").innerHTML = session_id;
+			    if (session_id) {
+					JWTinvoce(session_id, iat, line_text);
+				}
+			  }
+			});
+
+			xhr.open("POST", url + "/api/sessions/create");
+			xhr.setRequestHeader("Content-Type", "application/json");
+
+			xhr.send(JSON.stringify(data_send));
+	};
+
+	function JWTinvoce(session, iat, line_text) {
+
+		var price = parseInt(document.getElementById('sum').innerText);
+		var name = document.getElementById('name-f').value;
+		var email = document.getElementById('email-f').value;
+		var phone = document.getElementById('phone-f').value;
+
+		var data = {
+		   "params": {
+		      "sessionId": session,
+		      "systemType": "ECOM"
+		   },
+		   "data": {
+		      "externalId": '"'+iat+'"',
+		      "reusability": false,
+		      "description": line_text,
+		      "amount": price*100,
+		      "redirectUrl": "https://uapay.ua",
+		      "type": "PAY",
+		      "extraInfo":'{"phoneFrom":"' + phone + '","email":"' + email + '","FIO":"' + name + '"}'
+		   },
+		   "iat": time
+		};
+
+		var signature = encodedHeader() + "." + encodedData(data);
+		
+		document.getElementById("header_i").innerText = encodedHeader();
+		document.getElementById("payload_i").innerText = encodedData(data);
+		document.getElementById("signature_i").innerText = criptSignature(signature);
+
+		jwt_i = encodedHeader() + '.' + encodedData(data) + '.' +  criptSignature(signature);
+
+		var data_send = {
+		   "params": {
+		      "sessionId": session,
+		      "systemType": "ECOM"
+		   },
+		   "data": {
+		      "externalId": '"'+iat+'"',
+		      "reusability": false,
+		      "description": line_text,
+		      "amount": price*100,
+		      "redirectUrl": "https://uapay.ua",
+		      "type": "PAY",
+		      "extraInfo":'{"phoneFrom":"' + phone + '","email":"' + email + '","FIO":"' + name + '"}'
+		   },
+		   "iat": time,
+		   "token": jwt_i
+		};
+
+		document.getElementById("json_i").innerHTML = JSON.stringify(data_send, undefined, 2);
+
+		var xhr = new XMLHttpRequest();
+			
+		xhr.addEventListener("readystatechange", function () {
+			if (this.readyState === 4) {
+			  //console.log(JSON.parse(this.responseText));
+			  jwt_token = JSON.parse(this.responseText).data['token'];
+			  var url = parseJwt(jwt_token).paymentPageUrl;
+			  var barcode = parseJwt(jwt_token).paymentPageUrlQR;
+			  if (url) {
+			  	document.getElementById("res_f").innerHTML = '<span id="'+url+'" class="btn btn-primary" onclick="onPayment(this.id)">PAYMENT INVOCE</span>';
+			  	document.getElementById("res_i").innerHTML = '<a class="btn btn-primary" href="'+url+'">PAYMENT INVOCE</a><img src="'+barcode+'"/>';
+			  }
+			}
+		});
+
+		xhr.open("POST", url + "/api/invoicer/invoices/create");
+		xhr.setRequestHeader("Content-Type", "application/json");
+		xhr.send(JSON.stringify(data_send));
+	};
+
+	function parseJwt (token) {
+		var base64Url = token.split('.')[1];
+		var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+		var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+		    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+		}).join(''));
+
+		return JSON.parse(jsonPayload);
+	};
+
+	function base64url(source) {
+		  // Encode in classical base64
+		  encodedSource = CryptoJS.enc.Base64.stringify(source);
+		  
+		  // Remove padding equal characters
+		  encodedSource = encodedSource.replace(/=+$/, '');
+		  
+		  // Replace characters according to base64url specifications
+		  encodedSource = encodedSource.replace(/\+/g, '-');
+		  encodedSource = encodedSource.replace(/\//g, '_');
+		  
+		  return encodedSource;
+	}
+
+	function encodedHeader(){
+		var header = {
+			  "alg": "HS256",
+			  "typ": "JWT"
+			};
+		var stringifiedHeader = CryptoJS.enc.Utf8.parse(JSON.stringify(header));
+		var encodedHeader = base64url(stringifiedHeader);
+		return encodedHeader;
+	}
+
+	function encodedData(data){
+		var stringifiedData = CryptoJS.enc.Utf8.parse(JSON.stringify(data));
+		var encodedData = base64url(stringifiedData);
+		return encodedData;
+	}
+
+	function criptSignature(signature){
+		signature = CryptoJS.HmacSHA256(signature, secret);
+		signature = base64url(signature);
+		return signature;
+	}
+</script>
+
+<script>
+	//console.log(window.UAPAY);
+
+	
+
+	/*window.onload = function() {	
+		JWTwidget();
+		JWTsession();	
+	};*/
+
+	/*function startExample() {
+		var target = document.getElementById('target').value;
+		var token = document.getElementById('token').value;
+		var sandbox = document.getElementById('sandbox').checked;
+		var redirectUrl = 'https://uapay.ua';
+		var errorRedirectUrl = 'https://uapay.ua';
+		var customize = { bodyBg: '#d82d29' };
+		var initData = { target, sandbox, token, customize, redirectUrl,
+		errorRedirectUrl };
+		window.UAPAY.init(initData);
+	};*/
+
+	/*function JWTwidget() {
+		
+		var data = {
+			"params": {
+				"clientId": id,
+				"locale": "uk",
+				"systemType": "ECOM",
+				"externalId": "eef2384d-96ed-436d-97b0-40162776c704",
+				"type": "PAY",
+				"reusability": false,
+				"description": "test widget initialization",
+				"amount": 10000,
+				"redirectUrl": "https://uapay.ua",
+				"callbackUrl": "http://ptsv2.com/t/test_server/post"
+			},
+			"iat": time
+		};
+
+		var signature = encodedHeader() + "." + encodedData(data);
+
+		document.getElementById("header_w").innerText = encodedHeader();
+		document.getElementById("payload_w").innerText = encodedData(data);
+		document.getElementById("signature_w").innerText = criptSignature(signature);
+
+		jwt_w = encodedHeader() + '.' + encodedData(data) + '.' +  criptSignature(signature);
+
+		var data_send = {
+			"params": {
+				"clientId": id,
+				"locale": "uk",
+				"systemType": "ECOM",
+				"externalId": "eef2384d-96ed-436d-97b0-40162776c704",
+				"type": "PAY",
+				"reusability": false,
+				"description": "test widget initialization",
+				"amount": 10000,
+				"redirectUrl": "https://uapay.ua",
+				"callbackUrl": "http://ptsv2.com/t/test_server/post"
+			},
+			"iat": time,
+			"token": jwt_w
+		};
+			document.getElementById("token").value = jwt_w;
+			document.getElementById("json_w").innerHTML = JSON.stringify(data_send, undefined, 2);
+	};*/
+
+	
+
+	
+
+</script>
+
+
+
+</body>
+</html>
